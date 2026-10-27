@@ -15,32 +15,39 @@
 :root {
   color-scheme: light;
 
-  /* Warm paper (Light) */
-  --bg:            #F6F3EE;
+  /* Warm paper (Light) — this is the default for everyone; dark is an
+     opt-in via the toggle, never the system preference (see app.js
+     initTheme() and the anti-flash script in index.html's <head>). */
+  --bg:            #FAF8F5;
   --surface:       #FFFFFF;
-  --surface-2:     #FAF7F2;
-  --surface-3:     #F0EBE3;
-  --border:        #E6DFD4;
-  --border-strong: #D3CABB;
-  --text:          #1F1B16;
-  --text-muted:    #6B6358;
-  --text-faint:    #9A9184;
+  --surface-2:     #F3EFE9;
+  --surface-3:     #ECE6DC;
+  --border:        #E3DDD3;
+  --border-strong: #CFC6B8;
+  --text:          #1C1A17;
+  --text-muted:    #5C554C;
+  --text-faint:    #756E60;
 
-  /* Accent — warm gold/amber (replaces default blue) */
-  --accent:        #C9922E;
-  --accent-hover:  #B3801F;
-  --accent-soft:   rgba(201, 146, 46, 0.14);
-  --on-accent:     #1A1305;
+  /* Accent — blue, the one primary-action color (matches the church logo) */
+  --accent:        #2457D6;
+  --accent-hover:  #1D47B0;
+  --accent-soft:   rgba(36, 87, 214, 0.12);
+  --on-accent:     #FFFFFF;
 
-  /* Semantic colors — soft background + solid foreground */
-  --success:       #4FA36B;
-  --success-soft:  rgba(79, 163, 107, 0.14);
-  --warning:       #D9902B;
-  --warning-soft:  rgba(217, 144, 43, 0.14);
-  --danger:        #D95C4F;
-  --danger-soft:   rgba(217, 92, 79, 0.14);
-  --info:          #5B8DB8;
-  --info-soft:     rgba(91, 141, 184, 0.14);
+  /* Gold — tiny decorative highlights only. Never a button, a large
+     surface, or body text (see section 2 of the redesign brief). */
+  --gold:          #C9922E;
+  --gold-soft:     rgba(201, 146, 46, 0.14);
+
+  /* Semantic colors — soft background + solid, AA-checked foreground */
+  --success:       #1E7A46;
+  --success-soft:  #E6F4EA;
+  --warning:       #9A5B00;
+  --warning-soft:  #FFF1D6;
+  --danger:        #B3261E;
+  --danger-soft:   #FDE7E4;
+  --info:          #1F5FA8;
+  --info-soft:     #E3EEFA;
 
   /* ── Legacy aliases (kept so existing rules below need no renaming) ── */
   --clr-primary:       var(--accent);
@@ -123,7 +130,10 @@
   --header-h: 64px;
 }
 
-/* ─── Dark Theme Tokens (warm charcoal) ─────────────────────────── */
+/* ─── Dark Theme Tokens (warm charcoal) ─────────────────────────────
+   Opt-in only — set by the toggle (and remembered in localStorage),
+   never by the OS preference. See app.js initTheme() and the anti-flash
+   script in index.html's <head>. ──────────────────────────────────── */
 [data-theme="dark"] {
   color-scheme: dark;
 
@@ -135,12 +145,15 @@
   --border-strong: #463F37;
   --text:          #F2EEE8;
   --text-muted:    #A8A096;
-  --text-faint:    #766F66;
+  --text-faint:    #8F8779;
 
-  --accent:        #E0A93B;
-  --accent-hover:  #EDBB55;
-  --accent-soft:   rgba(224, 169, 59, 0.16);
-  --on-accent:     #1A1305;
+  --accent:        #2457D6;
+  --accent-hover:  #3D6FDE;
+  --accent-soft:   rgba(61, 111, 222, 0.22);
+  --on-accent:     #FFFFFF;
+
+  --gold:          #E0A93B;
+  --gold-soft:     rgba(224, 169, 59, 0.16);
 
   --success:       #4FA36B;
   --success-soft:  rgba(79, 163, 107, 0.18);
@@ -156,41 +169,6 @@
   --shadow:     0 4px 6px -1px rgba(0, 0, 0, 0.35), 0 2px 4px -2px rgba(0, 0, 0, 0.25);
   --shadow-md:  0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
   --shadow-lg:  0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.35);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    color-scheme: dark;
-
-    --bg:            #14120F;
-    --surface:       #1C1916;
-    --surface-2:     #24201C;
-    --surface-3:     #2D2823;
-    --border:        #332E28;
-    --border-strong: #463F37;
-    --text:          #F2EEE8;
-    --text-muted:    #A8A096;
-    --text-faint:    #766F66;
-
-    --accent:        #E0A93B;
-    --accent-hover:  #EDBB55;
-    --accent-soft:   rgba(224, 169, 59, 0.16);
-    --on-accent:     #1A1305;
-
-    --success:       #4FA36B;
-    --success-soft:  rgba(79, 163, 107, 0.18);
-    --warning:       #D9902B;
-    --warning-soft:  rgba(217, 144, 43, 0.18);
-    --danger:        #E07A6E;
-    --danger-soft:   rgba(224, 122, 110, 0.18);
-    --info:          #7FA8CC;
-    --info-soft:     rgba(127, 168, 204, 0.16);
-
-    --shadow-sm:  none;
-    --shadow:     0 4px 6px -1px rgba(0, 0, 0, 0.35), 0 2px 4px -2px rgba(0, 0, 0, 0.25);
-    --shadow-md:  0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
-    --shadow-lg:  0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.35);
-  }
 }
 
 /* ─── Reset + base ───────────────────────────────────────────────── */
@@ -255,6 +233,7 @@ input, textarea, select { font-family: inherit; font-size: 0.9375rem; }
 .login-card {
   background: var(--clr-surface);
   border: 1px solid var(--clr-border);
+  border-top: 3px solid var(--gold);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
   padding: 2.5rem 2.25rem;
@@ -452,15 +431,15 @@ input, textarea, select { font-family: inherit; font-size: 0.9375rem; }
   width: 40px;
   height: 40px;
   border-radius: var(--radius-pill);
-  background: var(--accent);
-  color: var(--on-accent);
+  background: var(--surface-2);
+  color: var(--text);
   font-weight: 600;
   font-size: 0.95rem;
   display: flex;
   align-items: center;
   justify-content: center;
   border: 2px solid var(--clr-surface);
-  box-shadow: 0 0 0 1.5px var(--clr-primary-border);
+  box-shadow: 0 0 0 1.5px var(--border);
   transition: transform var(--transition), box-shadow var(--transition);
   cursor: pointer;
 }

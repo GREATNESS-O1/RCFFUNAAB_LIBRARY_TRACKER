@@ -4,15 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Church Library Tracker — Manage book loans, track due dates, and send reminders for your church library.">
-  <meta name="theme-color" content="#F6F3EE">
+  <meta name="theme-color" content="#FAF8F5">
   <title>Church Library Tracker</title>
   <link rel="icon" href="assets/logo.png" type="image/png">
   <script>
     (function () {
+      // Light is the default for everyone — only an explicit toggle
+      // choice (saved below) switches to dark. We deliberately do not
+      // look at prefers-color-scheme here.
       try {
         var saved = localStorage.getItem("rcf_theme");
-        var theme = saved || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-        document.documentElement.setAttribute("data-theme", theme);
+        document.documentElement.setAttribute("data-theme", saved || "light");
       } catch (e) {}
     })();
   </script>

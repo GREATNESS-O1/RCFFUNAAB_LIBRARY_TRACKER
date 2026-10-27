@@ -112,10 +112,11 @@ function teardownApp() {
 /* ─── Theme Management ───────────────────────────────────────────── */
 
 function initTheme() {
+  // Light is the default for everyone; only a saved toggle choice opts
+  // into dark — we don't follow the OS preference (matches the
+  // anti-flash script in index.html's <head>).
   const saved = localStorage.getItem("rcf_theme");
-  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-  const initialTheme = saved || (prefersDark ? "dark" : "light");
-  applyTheme(initialTheme);
+  applyTheme(saved || "light");
 
   // Header theme toggle button
   document.getElementById("theme-toggle-btn")?.addEventListener("click", toggleTheme);
