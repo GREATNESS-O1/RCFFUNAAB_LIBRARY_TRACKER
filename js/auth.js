@@ -24,6 +24,15 @@ import { icon } from "./icons.js";
 let _auth = null;
 let _db = null;
 
+/**
+ * This build uses a single shared librarian account instead of per-person
+ * logins — the login screen only asks for the password, and signs in under
+ * this fixed email behind the scenes. Firestore security (the `librarians`
+ * allowlist + rules) is unaffected; this only changes what the login form
+ * shows.
+ */
+const SHARED_LOGIN_EMAIL = "bakaregreatness@gmail.com";
+
 /** Called once by app.js after Firebase is initialised. */
 export function initAuth(app) {
   _auth = getAuth(app);
@@ -82,7 +91,6 @@ export function currentUser() {
  */
 export function setupLoginView() {
   const form = document.getElementById("login-form");
-  const emailEl = document.getElementById("login-email");
   const passEl = document.getElementById("login-password");
   const errorEl = document.getElementById("login-error");
   const submitBtn = document.getElementById("login-submit");
@@ -90,11 +98,11 @@ export function setupLoginView() {
   const pwdToggleBtn = document.getElementById("login-pwd-toggle");
 
   // Populate input SVG icons
-  const emailIconSlot = document.getElementById("login-email-icon");
   const pwdIconSlot = document.getElementById("login-pwd-icon");
-  if (emailIconSlot) emailIconSlot.innerHTML = icon("user", { size: 18 });
   if (pwdIconSlot) pwdIconSlot.innerHTML = icon("clock", { size: 18 }); // or key/lock
   if (pwdToggleBtn) pwdToggleBtn.innerHTML = icon("eye", { size: 18 });
+
+  passEl?.focus();
 
   if (!form) return;
 
@@ -113,7 +121,7 @@ export function setupLoginView() {
     setLoading(true);
 
     try {
-      await loginUser(emailEl.value.trim(), passEl.value);
+      await loginUser(SHARED_LOGIN_EMAIL, passEl.value);
       // onAuthStateChanged in app.js will handle the view switch
     } catch (err) {
       showError(friendlyAuthError(err), err.isUnauthorized);
@@ -124,14 +132,9 @@ export function setupLoginView() {
 
   forgotLink && forgotLink.addEventListener("click", async (e) => {
     e.preventDefault();
-    const email = emailEl.value.trim();
-    if (!email) {
-      showError("Enter your email address above first.");
-      return;
-    }
     try {
-      await resetPassword(email);
-      showToast("Password reset email sent. Check your inbox.", "success");
+      await resetPassword(SHARED_LOGIN_EMAIL);
+      showToast(`Password reset email sent to ${SHARED_LOGIN_EMAIL}. Check that inbox.`, "success");
     } catch (err) {
       showError(friendlyAuthError(err));
     }
@@ -166,11 +169,11 @@ function friendlyAuthError(err) {
   if (code.includes("api-key-not-valid") || err?.message?.includes("api-key-not-valid"))
     return "Firebase API Key is missing or invalid. Please update js/firebase-config.js with your project credentials.";
   if (code.includes("wrong-password") || code.includes("invalid-credential"))
-    return "That email or password doesn't look right. Please check and try again.";
+    return "That password doesn't look right. Please check and try again.";
   if (code.includes("user-not-found"))
-    return "No librarian account found with that email address.";
+    return "The shared library account isn't set up yet. Contact your administrator.";
   if (code.includes("invalid-email"))
-    return "Please enter a valid email address.";
+    return "The configured login email isn't valid. Contact your administrator.";
   if (code.includes("too-many-requests"))
     return "Too many failed attempts. Please wait a moment and try again.";
   return err.message || "Login failed. Please try again.";
