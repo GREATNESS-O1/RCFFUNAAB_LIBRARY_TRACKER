@@ -56,6 +56,22 @@ service cloud.firestore {
         && hasStr(data, 'dueOn');
     }
 
+    // Validates a loan update: the resulting document must still have a
+    // valid shape, and bookId/borrowerId must not change (the app itself
+    // treats these as immutable after creation — "cannot be changed" in
+    // the edit UI — so the rule now actually enforces that instead of
+    // trusting the client).
+    function validLoanUpdate(data, existing) {
+      return data.bookId == existing.bookId
+        && data.borrowerId == existing.borrowerId
+        && hasStr(data, 'bookTitle')
+        && hasStr(data, 'borrowerName')
+        && hasStr(data, 'borrowerPhone')
+        && hasStr(data, 'borrowedOn')
+        && hasStr(data, 'dueOn')
+        && (!('returnedOn' in data) || data.returnedOn == null || data.returnedOn is string);
+    }
+
     // ─────────────────────────────────────────────────────────────
     // librarians/{uid}
     //   - A librarian may read their own document only.
@@ -94,7 +110,7 @@ service cloud.firestore {
     match /loans/{loanId} {
       allow read: if isLibrarian();
       allow create: if isLibrarian() && validLoan(request.resource.data);
-      allow update: if isLibrarian();
+      allow update: if isLibrarian() && validLoanUpdate(request.resource.data, resource.data);
       allow delete: if isLibrarian();
     }
 
