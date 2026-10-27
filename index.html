@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Church Library Tracker — Manage book loans, track due dates, and send reminders for your church library.">
+  <meta name="theme-color" content="#F6F3EE">
+  <title>Church Library Tracker</title>
+  <link rel="icon" href="assets/logo.png" type="image/png">
+  <script>
+    (function () {
+      try {
+        var saved = localStorage.getItem("rcf_theme");
+        var theme = saved || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        document.documentElement.setAttribute("data-theme", theme);
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<!-- ─────────────────────────────────────────────────────
+     TOAST CONTAINER (always in DOM)
+───────────────────────────────────────────────────── -->
+<div id="toast-container" aria-live="polite" aria-label="Notifications"></div>
+
+<!-- ═══════════════════════════════════════════════════
+     LOGIN VIEW
+═══════════════════════════════════════════════════ -->
+<div id="login-view" role="main">
+  <div class="login-card">
+    <div class="login-card__logo">
+      <img src="assets/logo.png" alt="RCF Church Library logo" width="68" height="68">
+      <h1>Church Library Tracker</h1>
+      <p>Sign in to manage the library</p>
+    </div>
+
+    <div id="login-error" class="login-error" hidden role="alert"></div>
+
+    <form id="login-form" novalidate>
+      <div class="form-group">
+        <label for="login-email">Email address</label>
+        <div class="login-input-wrap">
+          <span class="login-input-icon" id="login-email-icon"></span>
+          <input
+            type="email"
+            id="login-email"
+            class="form-control"
+            placeholder="librarian@church.org"
+            autocomplete="email"
+            required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="login-password">Password</label>
+        <div class="login-input-wrap">
+          <span class="login-input-icon" id="login-pwd-icon"></span>
+          <input
+            type="password"
+            id="login-password"
+            class="form-control"
+            placeholder="••••••••"
+            autocomplete="current-password"
+            required>
+          <button type="button" class="pwd-toggle-btn" id="login-pwd-toggle" aria-label="Show password" title="Show password">
+          </button>
+        </div>
+        <div style="display:flex; justify-content:flex-end;">
+          <a href="#" id="forgot-password-link" class="login-forgot">Forgot password?</a>
+        </div>
+      </div>
+
+      <button type="submit" id="login-submit" class="btn btn--primary" style="width:100%; margin-top:0.5rem;">Sign in</button>
+    </form>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     APP VIEW (shown after login)
+═══════════════════════════════════════════════════ -->
+<div id="app-view" hidden>
+
+  <!-- ── Offline Alert Banner ─────────────────────────────────── -->
+  <div id="offline-banner" class="offline-banner" hidden role="status" aria-live="polite">
+    <span class="offline-banner__icon"></span>
+    <span>You're offline. Changes will sync when you reconnect.</span>
+  </div>
+
+  <!-- ── Header ───────────────────────────────────── -->
+  <header class="app-header" role="banner" id="app-header">
+    <div class="header-logo">
+      <img src="assets/logo.png" alt="RCF logo" width="36" height="36">
+      <div class="header-title-group">
+        <span class="header-title">Church Library Tracker</span>
+        <span class="header-subtitle">Librarian dashboard</span>
+      </div>
+    </div>
+
+    <div class="header-spacer"></div>
+
+    <div class="header-right">
+      <!-- Theme toggle -->
+      <button class="theme-toggle-btn" id="theme-toggle-btn" aria-label="Toggle dark/light theme" title="Toggle theme">
+      </button>
+
+      <!-- Avatar button with initials -->
+      <button class="user-avatar-btn" id="user-avatar-btn" aria-haspopup="true" aria-expanded="false" aria-label="User profile and menu">
+        <span id="user-avatar-letter">L</span>
+      </button>
+
+      <!-- User Dropdown Menu -->
+      <div class="user-menu-dropdown" id="user-menu-dropdown" hidden role="menu">
+        <div class="user-menu__info">
+          <div class="user-menu__role">Librarian</div>
+          <div class="user-menu__email" id="librarian-email" title="">librarian@church.org</div>
+        </div>
+        <button class="user-menu__item" id="menu-theme-btn" role="menuitem">
+          <span class="user-menu__icon" id="menu-theme-icon"></span>
+          <span id="menu-theme-label">Switch theme</span>
+        </button>
+        <button class="user-menu__item user-menu__item--danger" id="logout-btn" role="menuitem">
+          <span class="user-menu__icon" id="menu-logout-icon"></span>
+          <span>Logout</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── Tab Bar (Underline on desktop / Fixed bottom on mobile) ──── -->
+  <nav class="tab-bar" role="tablist" aria-label="Main navigation">
+    <button class="tab-btn tab-btn--active" role="tab" data-tab="loans"
+      aria-selected="true" aria-controls="loans-panel" id="tab-loans">
+      <span class="tab-icon" id="tab-icon-loans"></span>
+      <span>Loans</span>
+    </button>
+    <button class="tab-btn" role="tab" data-tab="books"
+      aria-selected="false" aria-controls="books-panel" id="tab-books">
+      <span class="tab-icon" id="tab-icon-books"></span>
+      <span>Books</span>
+    </button>
+  </nav>
+
+  <!-- ── Main Content ─────────────────────────────── -->
+  <main class="app-main" role="main">
+
+    <!-- ══ LOANS PANEL ══════════════════════════════ -->
+    <div id="loans-panel" role="tabpanel" aria-labelledby="tab-loans">
+
+      <!-- Dashboard cards -->
+      <div class="dashboard-cards" aria-label="Library summary">
+        <div class="dash-card" aria-label="Total book titles">
+          <div class="dash-card__label">Book Titles</div>
+          <div class="dash-card__value" id="dash-total-books">—</div>
+        </div>
+        <div class="dash-card" aria-label="Currently borrowed">
+          <div class="dash-card__label">Borrowed</div>
+          <div class="dash-card__value" id="dash-borrowed">—</div>
+        </div>
+        <div class="dash-card dash-card--overdue dash-card--clickable"
+          id="dash-overdue-card" role="button" tabindex="0" aria-label="Overdue loans — click to filter">
+          <div class="dash-card__label">Overdue</div>
+          <div class="dash-card__value" id="dash-overdue">—</div>
+        </div>
+        <div class="dash-card dash-card--due-soon dash-card--clickable"
+          id="dash-due-soon-card" role="button" tabindex="0" aria-label="Due in 3 days — click to filter">
+          <div class="dash-card__label">Due Soon</div>
+          <div class="dash-card__value" id="dash-due-soon">—</div>
+        </div>
+      </div>
+
+      <!-- First-run Guidance Checklist (managed by loans.js) -->
+      <div id="first-run-checklist" class="checklist-card" hidden></div>
+
+      <!-- Search + New Loan button -->
+      <div class="loans-toolbar">
+        <div class="search-bar-wrap" style="flex:1;">
+          <span class="search-icon-slot" id="search-icon-slot"></span>
+          <input
+            type="search"
+            id="global-search"
+            class="search-bar search-bar--enhanced"
+            placeholder="Search by book title or name... (Press '/' to focus)"
+            aria-label="Search loans by book title or borrower name">
+          <button type="button" id="search-clear-btn" class="search-clear-btn" aria-label="Clear search query" hidden></button>
+          <kbd class="search-kbd-hint">/</kbd>
+        </div>
+        <button class="btn btn--primary" id="new-loan-btn" aria-label="Add new loan">
+          <span class="btn-icon-slot" id="new-loan-icon-slot"></span>
+          <span>New Loan</span>
+        </button>
+      </div>
+
+      <!-- Filter pills + Export button -->
+      <div class="filter-row">
+        <div id="filter-pills" class="filter-pills-scroll" role="group" aria-label="Filter loans by status">
+          <!-- Pills rendered by loans.js -->
+        </div>
+        <button class="btn btn--outline btn--sm" id="export-csv-btn" aria-label="Export records as CSV spreadsheet">
+          <span id="export-icon-slot"></span>
+          <span>Export (.csv)</span>
+        </button>
+      </div>
+
+      <!-- Results summary line -->
+      <div class="results-summary-line" id="loans-summary-line" aria-live="polite"></div>
+
+      <!-- Loans list (rendered by loans.js) -->
+      <div id="loans-list" aria-live="polite" aria-label="Loans list">
+        <div class="no-results">Loading…</div>
+      </div>
+    </div>
+    <!-- ══ END LOANS PANEL ═════════════════════════ -->
+
+    <!-- ══ BOOKS PANEL ══════════════════════════════ -->
+    <div id="books-panel" role="tabpanel" aria-labelledby="tab-books" hidden>
+      <!-- Books content rendered by books.js -->
+      <div id="books-content" aria-live="polite" aria-label="Books list">
+        <div class="no-results">Loading…</div>
+      </div>
+    </div>
+    <!-- ══ END BOOKS PANEL ════════════════════════ -->
+
+  </main>
+
+  <!-- ── Floating Action Button (mobile only) ──── -->
+  <button class="fab" id="fab-new-loan" aria-label="Add new loan">+</button>
+
+</div>
+<!-- ═══ END APP VIEW ══════════════════════════════ -->
+
+<!-- Firebase SDK (modular, from CDN) -->
+<script type="module" src="js/app.js"></script>
+
+</body>
+</html>

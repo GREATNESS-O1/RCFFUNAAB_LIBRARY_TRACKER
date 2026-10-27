@@ -1,0 +1,108 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ─────────────────────────────────────────────────────────────
+    // Helper: returns true if the requesting user is a librarian.
+    // A librarian is a Firebase Auth user whose UID exists as a
+    // document in the "librarians" collection.
+    // ─────────────────────────────────────────────────────────────
+    function isLibrarian() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/librarians/$(request.auth.uid));
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // Validation helpers
+    // ─────────────────────────────────────────────────────────────
+
+    // Checks that a string field is present and non-empty
+    function hasStr(data, field) {
+      return field in data && data[field] is string && data[field].size() > 0;
+    }
+
+    // Checks that a number field is present and within range
+    function hasNum(data, field, lo, hi) {
+      return field in data && data[field] is number
+        && data[field] >= lo && data[field] <= hi;
+    }
+
+    // Checks that an optional string field, if present, is a string within a max length
+    function optStr(data, field, maxLen) {
+      return !(field in data) || (data[field] is string && data[field].size() <= maxLen);
+    }
+
+    // Validates a book document on create/update
+    function validBook(data) {
+      return hasStr(data, 'title')
+        && ('author' in data && data.author is string)
+        && hasNum(data, 'copiesTotal', 1, 9999)
+        && hasNum(data, 'copiesAvailable', 0, data.copiesTotal)
+        && optStr(data, 'category', 60)
+        && optStr(data, 'shelfLocation', 60)
+        && optStr(data, 'description', 600)
+        && optStr(data, 'language', 40);
+    }
+
+    // Validates a loan document on create (basic field presence)
+    function validLoan(data) {
+      return hasStr(data, 'bookId')
+        && hasStr(data, 'bookTitle')
+        && hasStr(data, 'borrowerId')
+        && hasStr(data, 'borrowerName')
+        && hasStr(data, 'borrowerPhone')
+        && hasStr(data, 'borrowedOn')
+        && hasStr(data, 'dueOn');
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // librarians/{uid}
+    //   - A librarian may read their own document only.
+    //   - No client-side writes (accounts are created manually in console).
+    // ─────────────────────────────────────────────────────────────
+    match /librarians/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if false;  // Managed via Firebase console / Admin SDK only
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // books/{bookId}
+    //   - Librarian-only read and write.
+    //   - Validate field types and copy count constraints on write.
+    // ─────────────────────────────────────────────────────────────
+    match /books/{bookId} {
+      allow read: if isLibrarian();
+      allow create: if isLibrarian() && validBook(request.resource.data);
+      allow update: if isLibrarian() && validBook(request.resource.data);
+      allow delete: if isLibrarian();
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // borrowers/{borrowerId}
+    //   - Librarian-only read and write.
+    // ─────────────────────────────────────────────────────────────
+    match /borrowers/{borrowerId} {
+      allow read, write: if isLibrarian();
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // loans/{loanId}
+    //   - Librarian-only read and write.
+    //   - Validate required fields on create.
+    // ─────────────────────────────────────────────────────────────
+    match /loans/{loanId} {
+      allow read: if isLibrarian();
+      allow create: if isLibrarian() && validLoan(request.resource.data);
+      allow update: if isLibrarian();
+      allow delete: if isLibrarian();
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // Deny everything else by default
+    // ─────────────────────────────────────────────────────────────
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
