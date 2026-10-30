@@ -22,7 +22,7 @@ import { firebaseConfig } from "./firebase-config.js";
 import { initAuth, setupLoginView, logoutUser } from "./auth.js";
 import { initBooks, subscribeBooks, unsubscribeBooks, renderBooksTab, refreshCategoryChipsOverflow } from "./books.js";
 import { initLoans, subscribeLoans, unsubscribeLoans, renderLoansTab, openNewLoanModal, exportCSV, setLoansSearch } from "./loans.js";
-import { showToast } from "./ui.js";
+import { showToast, openHelpSheet } from "./ui.js";
 import { icon } from "./icons.js";
 import { todayString } from "./utils.js";
 
@@ -120,6 +120,9 @@ function initTheme() {
 
   // Header theme toggle button
   document.getElementById("theme-toggle-btn")?.addEventListener("click", toggleTheme);
+
+  // Header help button
+  document.getElementById("help-btn")?.addEventListener("click", openHelpSheet);
 
   // User menu theme toggle button
   document.getElementById("menu-theme-btn")?.addEventListener("click", () => {
@@ -274,7 +277,7 @@ function setupAppUI() {
       closeUserMenu();
       await logoutUser();
     } catch (err) {
-      showToast("Logout failed. Please try again.", "error");
+      showToast("Couldn't sign you out. Please try again.", "error");
     }
   });
 

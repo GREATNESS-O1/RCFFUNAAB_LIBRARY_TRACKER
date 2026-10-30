@@ -85,7 +85,7 @@ export function subscribeBooks(onUpdate) {
     },
     (err) => {
       console.error("Books snapshot error:", err);
-      showToast("Failed to load books. Check your connection.", "error");
+      showToast("Couldn't load the books. Check your internet connection and try again.", "error");
     }
   );
 
@@ -254,7 +254,7 @@ export function renderBooksTab(books) {
           <input type="search" class="search-bar search-bar--enhanced" id="books-search"
             placeholder="Search books…" aria-label="Search books"
             value="${escHtml(_searchQuery)}">
-          <button type="button" id="books-search-clear-btn" class="search-clear-btn" aria-label="Clear search query" ${_searchQuery ? "" : "hidden"}>${icon("x", { size: 14 })}</button>
+          <button type="button" id="books-search-clear-btn" class="search-clear-btn" title="Clear search" aria-label="Clear search query" ${_searchQuery ? "" : "hidden"}>${icon("x", { size: 14 })}</button>
         </div>
         <button class="btn btn--outline" id="import-books-btn">
           ${icon("download", { size: 15 })}
@@ -279,10 +279,10 @@ export function renderBooksTab(books) {
         <input type="search" class="search-bar search-bar--enhanced" id="books-search"
           placeholder="Search books…" aria-label="Search books"
           value="${escHtml(_searchQuery)}">
-        <button type="button" id="books-search-clear-btn" class="search-clear-btn" aria-label="Clear search query" ${_searchQuery ? "" : "hidden"}>${icon("x", { size: 14 })}</button>
+        <button type="button" id="books-search-clear-btn" class="search-clear-btn" title="Clear search" aria-label="Clear search query" ${_searchQuery ? "" : "hidden"}>${icon("x", { size: 14 })}</button>
       </div>
       <div class="books-sort-wrap">
-        <label for="books-sort" style="font-size:0.75rem; color:var(--clr-text-sub); font-weight:600;">Sort:</label>
+        <label for="books-sort" style="font-size:0.8125rem; color:var(--clr-text-sub); font-weight:600;">Sort:</label>
         <select id="books-sort" class="books-sort-select" aria-label="Sort books catalog">
           <option value="title" ${_bookSort === "title" ? "selected" : ""}>Title (A–Z)</option>
           <option value="author" ${_bookSort === "author" ? "selected" : ""}>Author (A–Z)</option>
@@ -466,7 +466,7 @@ function bookCard(b) {
           <div class="book-card__title" title="${escHtml(b.title)}">${escHtml(b.title)}</div>
           <div class="book-card__author">${escHtml(b.author || "")}</div>
         </div>
-        <div class="book-card__actions" style="display:flex; gap:0.25rem;">
+        <div class="book-card__actions">
           <button class="btn-icon btn-edit-book" data-id="${escHtml(b.id)}" title="Edit" aria-label="Edit ${escHtml(b.title)}">
             ${icon("edit", { size: 15 })}
           </button>
@@ -597,7 +597,7 @@ function openCurrentlyBorrowedModal(book) {
           <h3 class="modal__title">Currently Borrowed</h3>
           <div style="font-size:0.8125rem; color:var(--clr-text-sub); margin-top:0.2rem;">${escHtml(book.title)}</div>
         </div>
-        <button class="modal__close" aria-label="Close modal">${icon("x", { size: 16 })}</button>
+        <button class="modal__close" title="Close" aria-label="Close modal">${icon("x", { size: 16 })}</button>
       </div>
       <div class="modal__body">
         ${activeLoans.length === 0 ? `
@@ -610,7 +610,7 @@ function openCurrentlyBorrowedModal(book) {
                 <div class="borrowed-by-item">
                   <div>
                     <div style="font-weight:600; color:var(--clr-text);">${escHtml(l.borrowerName)}</div>
-                    <div style="font-size:0.75rem; color:var(--clr-text-sub); margin-top:0.15rem;">
+                    <div style="font-size:0.8125rem; color:var(--clr-text-sub); margin-top:0.15rem;">
                       Due: <strong>${friendlyDate(l.dueOn)}</strong>
                     </div>
                   </div>
@@ -689,7 +689,7 @@ function openBookDetailDrawer(book) {
       <div class="borrowed-by-item">
         <div>
           <div style="font-weight:600; color:var(--clr-text);">${escHtml(l.borrowerName)}</div>
-          <div style="font-size:0.75rem; color:var(--clr-text-sub); margin-top:0.15rem;">
+          <div style="font-size:0.8125rem; color:var(--clr-text-sub); margin-top:0.15rem;">
             Due ${friendlyDate(l.dueOn)} · ${escHtml(daysText)}
           </div>
         </div>
@@ -711,7 +711,7 @@ function openBookDetailDrawer(book) {
       <div class="loan-history-row">
         <div>
           <div style="font-weight:500; color:var(--clr-text); font-size:0.875rem;">${escHtml(l.borrowerName)}</div>
-          <div style="font-size:0.75rem; color:var(--clr-text-sub);">
+          <div style="font-size:0.8125rem; color:var(--clr-text-sub);">
             ${friendlyDate(l.borrowedOn)} → ${l.returnedOn ? friendlyDate(l.returnedOn) : friendlyDate(l.dueOn) + " (due)"}
           </div>
         </div>
@@ -727,7 +727,7 @@ function openBookDetailDrawer(book) {
 
   overlay.innerHTML = `
     <div class="book-drawer" role="document">
-      <button class="modal__close book-drawer__close" aria-label="Close book details">${icon("x", { size: 18 })}</button>
+      <button class="modal__close book-drawer__close" title="Close" aria-label="Close book details">${icon("x", { size: 18 })}</button>
 
       <div class="book-drawer__header">
         ${bookCoverHtml(book)}
@@ -808,7 +808,7 @@ function openBookModal(book, focusField) {
           <span style="color:var(--clr-primary); display:inline-flex;">${icon("book", { size: 18 })}</span>
           <h2 class="modal__title">${isEdit ? "Edit Book" : "Add New Book"}</h2>
         </div>
-        <button class="modal__close" aria-label="Close modal">${icon("x", { size: 16 })}</button>
+        <button class="modal__close" title="Close" aria-label="Close modal">${icon("x", { size: 16 })}</button>
       </div>
       <div class="modal__body">
         <div class="form-group">
@@ -925,7 +925,7 @@ function openBookModal(book, focusField) {
     try {
       if (isEdit) {
         await editBookTransaction(book, fields);
-        showToast("Book updated successfully.", "success");
+        showToast("Done! Changes saved.", "success");
       } else {
         await addDoc(collection(_db, "books"), {
           title,
@@ -940,7 +940,7 @@ function openBookModal(book, focusField) {
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
         });
-        showToast("Book added to catalog.", "success");
+        showToast("Done! Book added to the library.", "success");
       }
       closeModal(overlay);
     } catch (err) {
@@ -1007,7 +1007,7 @@ async function deleteBook(bookId) {
 
   if (!loansSnap.empty) {
     showToast(
-      "Cannot delete — this book has active loans. Mark them returned first.",
+      "Can't delete this — someone still has it out. Mark it returned first.",
       "error",
       5000
     );
@@ -1015,17 +1015,17 @@ async function deleteBook(bookId) {
   }
 
   const ok = await confirmDialog(
-    `Delete "${bookTitle}" from the library catalog? Historical loan records will keep the book title. This action cannot be undone.`,
-    { title: "Delete Book", confirmText: "Delete Book", danger: true }
+    `Delete "${bookTitle}"? Past loan records will still show its title. This cannot be undone.`,
+    { title: "Delete this book?", confirmText: "Yes, delete", danger: true }
   );
   if (!ok) return;
 
   try {
     await deleteDoc(doc(_db, "books", bookId));
-    showToast("Book deleted from catalog.", "success");
+    showToast("Deleted. That book is gone.", "success");
   } catch (err) {
     console.error(err);
-    showToast("Failed to delete book: " + err.message, "error");
+    showToast("Couldn't delete that — " + err.message, "error");
   }
 }
 
@@ -1073,7 +1073,7 @@ export function openImportBooksModal() {
           <span style="color:var(--clr-primary); display:inline-flex;">${icon("download", { size: 18 })}</span>
           <h2 class="modal__title" id="import-modal-title">Import Books from Spreadsheet</h2>
         </div>
-        <button class="modal__close" aria-label="Close modal">${icon("x", { size: 16 })}</button>
+        <button class="modal__close" title="Close" aria-label="Close modal">${icon("x", { size: 16 })}</button>
       </div>
 
       <div class="modal__body">
@@ -1661,7 +1661,7 @@ export function openApplyCategoriesModal() {
           <span style="color:var(--accent); display:inline-flex;">${icon("tag", { size: 18 })}</span>
           <h2 class="modal__title" id="catimport-modal-title">Set Categories from CSV</h2>
         </div>
-        <button class="modal__close" aria-label="Close modal">${icon("x", { size: 16 })}</button>
+        <button class="modal__close" title="Close" aria-label="Close modal">${icon("x", { size: 16 })}</button>
       </div>
 
       <div class="modal__body">

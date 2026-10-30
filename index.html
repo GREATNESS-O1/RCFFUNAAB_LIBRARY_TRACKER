@@ -89,12 +89,15 @@
     <div class="header-spacer"></div>
 
     <div class="header-right">
+      <!-- Help -->
+      <button class="help-btn" id="help-btn" aria-label="Help — how to use this app" title="Help">?</button>
+
       <!-- Theme toggle -->
       <button class="theme-toggle-btn" id="theme-toggle-btn" aria-label="Toggle dark/light theme" title="Toggle theme">
       </button>
 
       <!-- Avatar button with initials -->
-      <button class="user-avatar-btn" id="user-avatar-btn" aria-haspopup="true" aria-expanded="false" aria-label="User profile and menu">
+      <button class="user-avatar-btn" id="user-avatar-btn" aria-haspopup="true" aria-expanded="false" aria-label="User profile and menu" title="Your account">
         <span id="user-avatar-letter">L</span>
       </button>
 
@@ -110,7 +113,7 @@
         </button>
         <button class="user-menu__item user-menu__item--danger" id="logout-btn" role="menuitem">
           <span class="user-menu__icon" id="menu-logout-icon"></span>
-          <span>Logout</span>
+          <span>Sign out</span>
         </button>
       </div>
     </div>
@@ -121,7 +124,7 @@
     <button class="tab-btn tab-btn--active" role="tab" data-tab="loans"
       aria-selected="true" aria-controls="loans-panel" id="tab-loans">
       <span class="tab-icon" id="tab-icon-loans"></span>
-      <span>Loans</span>
+      <span>Lent out</span>
     </button>
     <button class="tab-btn" role="tab" data-tab="books"
       aria-selected="false" aria-controls="books-panel" id="tab-books">
@@ -138,22 +141,22 @@
 
       <!-- Dashboard cards -->
       <div class="dashboard-cards" aria-label="Library summary">
-        <div class="dash-card" aria-label="Total book titles">
-          <div class="dash-card__label">Book Titles</div>
+        <div class="dash-card" aria-label="Books in library">
+          <div class="dash-card__label">Books in library</div>
           <div class="dash-card__value" id="dash-total-books">—</div>
         </div>
-        <div class="dash-card" aria-label="Currently borrowed">
-          <div class="dash-card__label">Borrowed</div>
+        <div class="dash-card" aria-label="Lent out now">
+          <div class="dash-card__label">Lent out now</div>
           <div class="dash-card__value" id="dash-borrowed">—</div>
         </div>
         <div class="dash-card dash-card--overdue dash-card--clickable"
-          id="dash-overdue-card" role="button" tabindex="0" aria-label="Overdue loans — click to filter">
-          <div class="dash-card__label">Overdue</div>
+          id="dash-overdue-card" role="button" tabindex="0" aria-label="Late books — tap to see them">
+          <div class="dash-card__label">Late</div>
           <div class="dash-card__value" id="dash-overdue">—</div>
         </div>
         <div class="dash-card dash-card--due-soon dash-card--clickable"
-          id="dash-due-soon-card" role="button" tabindex="0" aria-label="Due in 3 days — click to filter">
-          <div class="dash-card__label">Due Soon</div>
+          id="dash-due-soon-card" role="button" tabindex="0" aria-label="Due this week — tap to see them">
+          <div class="dash-card__label">Due this week</div>
           <div class="dash-card__value" id="dash-due-soon">—</div>
         </div>
       </div>
@@ -169,14 +172,14 @@
             type="search"
             id="global-search"
             class="search-bar search-bar--enhanced"
-            placeholder="Search by book title or name... (Press '/' to focus)"
+            placeholder="Search by book or person's name"
             aria-label="Search loans by book title or borrower name">
-          <button type="button" id="search-clear-btn" class="search-clear-btn" aria-label="Clear search query" hidden></button>
+          <button type="button" id="search-clear-btn" class="search-clear-btn" title="Clear search" aria-label="Clear search query" hidden></button>
           <kbd class="search-kbd-hint">/</kbd>
         </div>
-        <button class="btn btn--primary" id="new-loan-btn" aria-label="Add new loan">
+        <button class="btn btn--primary" id="new-loan-btn" aria-label="Lend a book">
           <span class="btn-icon-slot" id="new-loan-icon-slot"></span>
-          <span>New Loan</span>
+          <span>Lend a book</span>
         </button>
       </div>
 
@@ -185,9 +188,9 @@
         <div id="filter-pills" class="filter-pills-scroll" role="group" aria-label="Filter loans by status">
           <!-- Pills rendered by loans.js -->
         </div>
-        <button class="btn btn--outline btn--sm" id="export-csv-btn" aria-label="Export records as CSV spreadsheet">
+        <button class="btn btn--outline btn--sm" id="export-csv-btn" aria-label="Download the list as a spreadsheet file">
           <span id="export-icon-slot"></span>
-          <span>Export (.csv)</span>
+          <span>Download list (Excel)</span>
         </button>
       </div>
 
@@ -213,7 +216,7 @@
   </main>
 
   <!-- ── Floating Action Button (mobile only) ──── -->
-  <button class="fab" id="fab-new-loan" aria-label="Add new loan">+</button>
+  <button class="fab" id="fab-new-loan" aria-label="Lend a book">+</button>
 
 </div>
 <!-- ═══ END APP VIEW ══════════════════════════════ -->

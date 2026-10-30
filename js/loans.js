@@ -102,7 +102,7 @@ export function subscribeLoans(onUpdate) {
     },
     (err) => {
       console.error("Loans snapshot error:", err);
-      showToast("Failed to load loans. Check your connection.", "error");
+      showToast("Couldn't load the list. Check your internet connection and try again.", "error");
     }
   );
 
@@ -167,8 +167,8 @@ export function renderLoansTab(loans) {
 }
 
 function renderDashboard(loans, counts, today) {
-  const totalBooksCard = document.querySelector('.dash-card[aria-label="Total book titles"]');
-  const borrowedCard = document.querySelector('.dash-card[aria-label="Currently borrowed"]');
+  const totalBooksCard = document.querySelector('.dash-card[aria-label="Books in library"]');
+  const borrowedCard = document.querySelector('.dash-card[aria-label="Lent out now"]');
   const overdueCard = document.getElementById("dash-overdue-card");
   const dueSoonCard = document.getElementById("dash-due-soon-card");
 
@@ -176,7 +176,7 @@ function renderDashboard(loans, counts, today) {
   if (totalBooksCard && !totalBooksCard.querySelector(".dash-card__header")) {
     totalBooksCard.innerHTML = `
       <div class="dash-card__header">
-        <span class="dash-card__label">Book Titles</span>
+        <span class="dash-card__label">Books in library</span>
         <span class="dash-card__icon-chip">${icon("books", { size: 18 })}</span>
       </div>
       <div class="dash-card__value" id="dash-total-books">0</div>
@@ -186,7 +186,7 @@ function renderDashboard(loans, counts, today) {
   if (borrowedCard && !borrowedCard.querySelector(".dash-card__header")) {
     borrowedCard.innerHTML = `
       <div class="dash-card__header">
-        <span class="dash-card__label">Borrowed</span>
+        <span class="dash-card__label">Lent out now</span>
         <span class="dash-card__icon-chip">${icon("book", { size: 18 })}</span>
       </div>
       <div class="dash-card__value" id="dash-borrowed">0</div>
@@ -196,21 +196,27 @@ function renderDashboard(loans, counts, today) {
   if (overdueCard && !overdueCard.querySelector(".dash-card__header")) {
     overdueCard.innerHTML = `
       <div class="dash-card__header">
-        <span class="dash-card__label">Overdue</span>
+        <span class="dash-card__label">Late</span>
         <span class="dash-card__icon-chip">${icon("alert", { size: 18 })}</span>
       </div>
       <div class="dash-card__value" id="dash-overdue">0</div>
-      <div class="dash-card__helper">Needs follow-up</div>
+      <div class="dash-card__footer-row">
+        <span class="dash-card__helper">Past the return date</span>
+        <span class="dash-card__view">View${icon("chevron-right", { size: 14 })}</span>
+      </div>
     `;
   }
   if (dueSoonCard && !dueSoonCard.querySelector(".dash-card__header")) {
     dueSoonCard.innerHTML = `
       <div class="dash-card__header">
-        <span class="dash-card__label">Due Soon</span>
+        <span class="dash-card__label">Due this week</span>
         <span class="dash-card__icon-chip">${icon("clock", { size: 18 })}</span>
       </div>
       <div class="dash-card__value" id="dash-due-soon">0</div>
-      <div class="dash-card__helper">Next 3 days</div>
+      <div class="dash-card__footer-row">
+        <span class="dash-card__helper">Within 3 days</span>
+        <span class="dash-card__view">View${icon("chevron-right", { size: 14 })}</span>
+      </div>
     `;
   }
 
@@ -229,12 +235,12 @@ function renderDashboard(loans, counts, today) {
       overdueCard?.classList.add("dash-card--overdue-zero");
       overdueCard?.classList.remove("dash-card--overdue");
       const helper = overdueCard?.querySelector(".dash-card__helper");
-      if (helper) helper.textContent = "All up to date";
+      if (helper) helper.textContent = "None. Great!";
     } else {
       overdueCard?.classList.remove("dash-card--overdue-zero");
       overdueCard?.classList.add("dash-card--overdue");
       const helper = overdueCard?.querySelector(".dash-card__helper");
-      if (helper) helper.textContent = "Needs follow-up";
+      if (helper) helper.textContent = "Past the return date";
     }
   }
 
@@ -248,7 +254,16 @@ function renderDashboard(loans, counts, today) {
   });
 
   const dsVal = document.getElementById("dash-due-soon");
-  if (dsVal) dsVal.textContent = dueSoon.length;
+  if (dsVal) {
+    dsVal.textContent = dueSoon.length;
+    if (dueSoon.length === 0) {
+      dueSoonCard?.classList.add("dash-card--due-soon-zero");
+      dueSoonCard?.classList.remove("dash-card--due-soon");
+    } else {
+      dueSoonCard?.classList.remove("dash-card--due-soon-zero");
+      dueSoonCard?.classList.add("dash-card--due-soon");
+    }
+  }
 
   // Highlight active filter card border
   overdueCard?.classList.toggle("dash-card--active-filter", _filter === "overdue");
@@ -259,7 +274,7 @@ function renderPills(counts) {
   if (!pillsEl) return;
 
   const filters = ["all", "active", "overdue", "returned"];
-  const labels = { all: "All", active: "Active", overdue: "Overdue", returned: "Returned" };
+  const labels = { all: "Everything", active: "Out now", overdue: "Late", returned: "Returned" };
 
   pillsEl.innerHTML = filters
     .map((f) => `
@@ -346,13 +361,13 @@ export function updateChecklist() {
         <span class="checklist-check ${loansDone ? "checklist-check--done" : ""}">
           ${icon(loansDone ? "check" : "book", { size: 13 })}
         </span>
-        <span class="checklist-text">2. Record your first loan</span>
+        <span class="checklist-text">2. Lend your first book</span>
       </div>
       <div class="checklist-item ${waDone ? "checklist-item--done" : ""}" id="checklist-item-wa" style="cursor:pointer;" title="Click to complete step">
         <span class="checklist-check ${waDone ? "checklist-check--done" : ""}">
           ${icon(waDone ? "check" : "whatsapp", { size: 13 })}
         </span>
-        <span class="checklist-text">3. Set up WhatsApp reminders ${waDone ? "(Ready)" : "(Click to mark ready)"}</span>
+        <span class="checklist-text">3. Remind someone on WhatsApp ${waDone ? "(Done!)" : "(Click to mark done)"}</span>
       </div>
     </div>
   `;
@@ -381,7 +396,6 @@ function renderLoansList(visible, isEmpty, today) {
 
   if (isEmpty) {
     listEl.innerHTML = emptyStateLoans();
-    document.getElementById("empty-new-loan-btn")?.addEventListener("click", openNewLoanModal);
     return;
   }
 
@@ -420,9 +434,9 @@ function renderLoansList(visible, isEmpty, today) {
   });
 
   const sectionOrder = [
-    { key: "overdue", label: "Overdue", icon: "alert", items: groups.overdue },
-    { key: "dueSoon", label: "Due Soon", icon: "clock", items: groups.dueSoon },
-    { key: "active", label: "Active", icon: "book", items: groups.active },
+    { key: "overdue", label: "Late", icon: "alert", items: groups.overdue },
+    { key: "dueSoon", label: "Due this week", icon: "clock", items: groups.dueSoon },
+    { key: "active", label: "Out now", icon: "book", items: groups.active },
     { key: "returned", label: "Returned", icon: "check", items: groups.returned },
   ];
 
@@ -487,25 +501,25 @@ function loanRow(loan, today) {
         ${icon("undo", { size: 14 })}
         <span>Reopen</span>
       </button>`
-    : `<button class="btn btn--primary btn--sm btn-return" data-id="${escHtml(loan.id)}" title="Mark returned" aria-label="Mark returned">
+    : `<button class="btn btn--outline btn--sm btn-return" data-id="${escHtml(loan.id)}" title="Book returned" aria-label="Book returned">
         ${icon("check", { size: 14 })}
-        <span>Return</span>
+        <span>Book returned</span>
       </button>`;
 
   const overflowMenu = `
     <div class="action-overflow-wrap">
-      <button class="btn-icon btn-action-more" aria-label="More actions for ${escHtml(loan.bookTitle)}" aria-haspopup="true" aria-expanded="false" data-id="${escHtml(loan.id)}">
+      <button class="btn-icon btn-action-more" title="More actions" aria-label="More actions for ${escHtml(loan.bookTitle)}" aria-haspopup="true" aria-expanded="false" data-id="${escHtml(loan.id)}">
         ${icon("more-vertical", { size: 16 })}
       </button>
       <div class="action-overflow-menu" hidden role="menu">
         ${!isReturned ? `
           <button class="action-menu-item btn-extend" data-id="${escHtml(loan.id)}" role="menuitem">
             ${icon("calendar", { size: 14 })}
-            <span>Extend due date</span>
+            <span>Give more time</span>
           </button>
           <button class="action-menu-item btn-remind" data-id="${escHtml(loan.id)}" role="menuitem">
             ${icon("whatsapp", { size: 14 })}
-            <span>Send reminder</span>
+            <span>Remind on WhatsApp</span>
           </button>
         ` : ""}
         <a href="tel:${escHtml(loan.borrowerPhone)}" class="action-menu-item" role="menuitem">
@@ -530,8 +544,8 @@ function loanRow(loan, today) {
         <div class="td-sub">${escHtml(loan.bookAuthor || "")}</div>
       </td>
       <td>
-        <div style="font-weight:600;">${escHtml(loan.borrowerName)}</div>
-        <div class="td-sub">${escHtml(loan.borrowerPhone)}</div>
+        <div style="font-weight:700; font-size:1rem;">${escHtml(loan.borrowerName)}</div>
+        <a href="tel:${escHtml(loan.borrowerPhone)}" class="td-sub td-phone-link">${escHtml(loan.borrowerPhone)}</a>
       </td>
       <td>${friendlyDate(loan.borrowedOn)}</td>
       <td>${friendlyDate(loan.dueOn)}</td>
@@ -560,8 +574,8 @@ function loanCard(loan, today) {
           ${statusBadge(status)}
         </div>
         <div class="loan-card__borrower">
-          <span style="font-weight:600;">${escHtml(loan.borrowerName)}</span>
-          <span class="loan-card__phone">${escHtml(loan.borrowerPhone)}</span>
+          <span style="font-weight:700;">${escHtml(loan.borrowerName)}</span>
+          <a href="tel:${escHtml(loan.borrowerPhone)}" class="loan-card__phone">${escHtml(loan.borrowerPhone)}</a>
         </div>
         <div class="loan-card__footer">
           <div class="loan-card__quick-contact">
@@ -586,8 +600,8 @@ function loanCard(loan, today) {
         </div>
         <div class="loan-card__actions">
           ${!isReturned ? `
-            <button class="btn btn--primary btn--sm btn-return" data-id="${escHtml(loan.id)}">${icon("check", { size: 14 })}<span>Return</span></button>
-            <button class="btn btn--outline btn--sm btn-extend" data-id="${escHtml(loan.id)}">${icon("calendar", { size: 14 })}<span>Extend</span></button>
+            <button class="btn btn--outline btn--sm btn-return" data-id="${escHtml(loan.id)}">${icon("check", { size: 14 })}<span>Book returned</span></button>
+            <button class="btn btn--outline btn--sm btn-extend" data-id="${escHtml(loan.id)}">${icon("calendar", { size: 14 })}<span>More time</span></button>
             <button class="btn btn--outline btn--sm btn-remind" data-id="${escHtml(loan.id)}">${icon("whatsapp", { size: 14 })}<span>Remind</span></button>
           ` : `
             <button class="btn btn--outline btn--sm btn-reopen" data-id="${escHtml(loan.id)}">${icon("undo", { size: 14 })}<span>Reopen</span></button>
@@ -632,7 +646,7 @@ function bindLoanActions() {
   // Mobile accordion cards
   document.querySelectorAll(".loan-card__main").forEach((cardMain) => {
     cardMain.addEventListener("click", (e) => {
-      if (e.target.closest(".quick-icon-btn")) return;
+      if (e.target.closest(".quick-icon-btn") || e.target.closest(".loan-card__phone")) return;
 
       const card = cardMain.closest(".loan-card");
       const expanded = card.querySelector(".loan-card__expanded");
@@ -703,16 +717,16 @@ export function openNewLoanModal(preselectBook) {
   overlay.className = "modal-overlay";
   overlay.setAttribute("role", "dialog");
   overlay.setAttribute("aria-modal", "true");
-  overlay.setAttribute("aria-label", "New Loan");
+  overlay.setAttribute("aria-label", "Lend a book");
 
   overlay.innerHTML = `
     <div class="modal modal--large">
       <div class="modal__header">
         <div style="display:flex; align-items:center; gap:0.5rem;">
           <span style="color:var(--clr-primary); display:inline-flex;">${icon("book", { size: 20 })}</span>
-          <h2 class="modal__title">New Loan</h2>
+          <h2 class="modal__title">Lend a book</h2>
         </div>
-        <button class="modal__close" id="nl-close" aria-label="Close modal">${icon("x", { size: 16 })}</button>
+        <button class="modal__close" id="nl-close" title="Close" aria-label="Close modal">${icon("x", { size: 16 })}</button>
       </div>
       <div class="modal__body">
         <!-- Step 1: Who is borrowing? -->
@@ -795,7 +809,7 @@ export function openNewLoanModal(preselectBook) {
         <button type="button" class="btn btn--outline" id="nl-cancel">Cancel</button>
         <button type="button" class="btn btn--primary" id="nl-save">
           ${icon("check", { size: 16 })}
-          <span>Create Loan</span>
+          <span>Lend this book</span>
         </button>
       </div>
     </div>`;
@@ -904,7 +918,7 @@ export function openNewLoanModal(preselectBook) {
         <span class="selected-book__title">${escHtml(book.title)}</span>
         <span class="selected-book__meta">${escHtml(book.author || "")} · ${book.copiesAvailable} available</span>
       </div>
-      <button type="button" class="selected-book__clear" aria-label="Clear book selection">${icon("x", { size: 14 })}</button>
+      <button type="button" class="selected-book__clear" title="Clear" aria-label="Clear book selection">${icon("x", { size: 14 })}</button>
     `;
     selectedBook.hidden = false;
     bookSearch.hidden = true;
@@ -1063,13 +1077,13 @@ export function openNewLoanModal(preselectBook) {
     );
     if (dupCheck) {
       const proceed = await confirmDialog(
-        `${name} already has an active loan for this book. Create another loan anyway?`,
-        { title: "Duplicate active loan", confirmText: "Create Anyway", danger: false }
+        `${name} already has this book out. Lend it to them again anyway?`,
+        { title: "Already lent out", confirmText: "Yes, lend it again", danger: false }
       );
       if (!proceed) return;
     }
 
-    const restore = setButtonLoading(saveBtn, "Creating loan…");
+    const restore = setButtonLoading(saveBtn, "Saving…");
     try {
       const newLoanId = await createLoanTransaction({
         bookId,
@@ -1082,20 +1096,21 @@ export function openNewLoanModal(preselectBook) {
       });
 
       // Brief success checkmark feedback before closing
-      saveBtn.innerHTML = `<span style="display:inline-flex; align-items:center; gap:0.4rem;">${icon("check", { size: 16 })} <span>Created!</span></span>`;
+      saveBtn.innerHTML = `<span style="display:inline-flex; align-items:center; gap:0.4rem;">${icon("check", { size: 16 })} <span>Done!</span></span>`;
 
       setTimeout(() => {
         closeModal(overlay);
         // Show stackable toast with 6-second Undo action
-        showToast("Loan created successfully!", "success", 6000, {
+        const bookTitle = selectedBookData?.title || "the book";
+        showToast(`Done! ${name} borrowed "${bookTitle}". Due ${friendlyDate(dueOn)}.`, "success", 6000, {
           actionText: "Undo",
           onAction: async () => {
             try {
               await undoCreateLoan(newLoanId, bookId);
-              showToast("Loan creation undone.", "info");
+              showToast("Undone — that loan was removed.", "info");
             } catch (undoErr) {
               console.error("Undo error:", undoErr);
-              showToast("Could not undo: " + undoErr.message, "error");
+              showToast("Couldn't undo that — " + undoErr.message, "error");
             }
           },
         });
@@ -1103,7 +1118,7 @@ export function openNewLoanModal(preselectBook) {
     } catch (err) {
       console.error(err);
       restore();
-      showToast(err.message || "Failed to create loan. Please try again.", "error");
+      showToast(err.message || "Couldn't save that loan — please try again.", "error");
     }
   });
 }
@@ -1251,45 +1266,60 @@ async function markReturned(loanId) {
         tx.update(bookRef, { copiesAvailable: newAvail });
       }
     });
-    showToast("Marked as returned.", "success");
+    showToast(`Done! Marked as returned.`, "success", 6000, {
+      actionText: "Undo",
+      onAction: async () => {
+        try {
+          await reopenLoanTx(loanId);
+          showToast("Undone — marked as still out.", "info");
+        } catch (undoErr) {
+          console.error("Undo error:", undoErr);
+          showToast("Couldn't undo that — " + undoErr.message, "error");
+        }
+      },
+    });
   } catch (err) {
     console.error(err);
-    showToast("Failed to mark returned: " + err.message, "error");
+    showToast("Couldn't mark that as returned — " + err.message, "error");
   }
+}
+
+/** Shared transaction: reopens a returned loan and takes 1 copy off the shelf again. */
+async function reopenLoanTx(loanId) {
+  const loanRef = doc(_db, "loans", loanId);
+  await runTransaction(_db, async (tx) => {
+    const loanSnap = await tx.get(loanRef);
+    if (!loanSnap.exists()) throw new Error("Loan not found.");
+    const loan = loanSnap.data();
+    if (!loan.returnedOn) throw new Error("Loan is not returned.");
+
+    const bookRef = doc(_db, "books", loan.bookId);
+    const bookSnap = await tx.get(bookRef);
+
+    if (!bookSnap.exists()) throw new Error("Book not found — it may have been deleted.");
+    const book = bookSnap.data();
+    if ((book.copiesAvailable || 0) < 1) {
+      throw new Error("No copies available to reopen this loan. All copies are currently out.");
+    }
+
+    tx.update(loanRef, { returnedOn: null, updatedAt: serverTimestamp() });
+    tx.update(bookRef, { copiesAvailable: (book.copiesAvailable || 0) - 1 });
+  });
 }
 
 async function reopenLoan(loanId) {
   const ok = await confirmDialog(
-    "Reopen this loan? This will take 1 copy off the shelf.",
-    { title: "Reopen Loan", confirmText: "Reopen Loan", danger: false }
+    "Open this loan again? One copy will come off the shelf again.",
+    { title: "Reopen this loan?", confirmText: "Yes, reopen it", danger: false }
   );
   if (!ok) return;
 
-  const loanRef = doc(_db, "loans", loanId);
-
   try {
-    await runTransaction(_db, async (tx) => {
-      const loanSnap = await tx.get(loanRef);
-      if (!loanSnap.exists()) throw new Error("Loan not found.");
-      const loan = loanSnap.data();
-      if (!loan.returnedOn) throw new Error("Loan is not returned.");
-
-      const bookRef = doc(_db, "books", loan.bookId);
-      const bookSnap = await tx.get(bookRef);
-
-      if (!bookSnap.exists()) throw new Error("Book not found — it may have been deleted.");
-      const book = bookSnap.data();
-      if ((book.copiesAvailable || 0) < 1) {
-        throw new Error("No copies available to reopen this loan. All copies are currently out.");
-      }
-
-      tx.update(loanRef, { returnedOn: null, updatedAt: serverTimestamp() });
-      tx.update(bookRef, { copiesAvailable: (book.copiesAvailable || 0) - 1 });
-    });
-    showToast("Loan reopened.", "success");
+    await reopenLoanTx(loanId);
+    showToast("Done! That loan is open again.", "success");
   } catch (err) {
     console.error(err);
-    showToast("Failed to reopen loan: " + err.message, "error");
+    showToast("Couldn't reopen that loan — " + err.message, "error");
   }
 }
 
@@ -1301,22 +1331,22 @@ async function extendDueDate(loanId) {
   overlay.className = "modal-overlay";
   overlay.setAttribute("role", "dialog");
   overlay.setAttribute("aria-modal", "true");
-  overlay.setAttribute("aria-label", "Extend Due Date");
+  overlay.setAttribute("aria-label", "Give more time");
 
   const minDate = addDays(loan.dueOn, 1);
 
   overlay.innerHTML = `
     <div class="modal modal--small">
       <div class="modal__header">
-        <h2 class="modal__title">Extend Due Date</h2>
-        <button class="modal__close" aria-label="Close">${icon("x", { size: 16 })}</button>
+        <h2 class="modal__title">Give more time</h2>
+        <button class="modal__close" title="Close" aria-label="Close">${icon("x", { size: 16 })}</button>
       </div>
       <div class="modal__body">
         <p style="font-size:0.875rem; margin-bottom:1rem; color:var(--clr-text-sub);">
           Current due date: <strong style="color:var(--clr-text);">${friendlyDate(loan.dueOn)}</strong>
         </p>
         <div class="form-group">
-          <label for="ext-date">New Due Date <span class="required">*</span></label>
+          <label for="ext-date">New due date <span class="required">*</span></label>
           <input type="date" id="ext-date" class="form-control" min="${minDate}" value="${minDate}" required>
           <div class="field-error-msg" id="ext-error" hidden></div>
         </div>
@@ -1325,7 +1355,7 @@ async function extendDueDate(loanId) {
         <button class="btn btn--outline" id="ext-cancel">Cancel</button>
         <button class="btn btn--primary" id="ext-save">
           ${icon("calendar", { size: 15 })}
-          <span>Extend</span>
+          <span>Give more time</span>
         </button>
       </div>
     </div>`;
@@ -1349,16 +1379,28 @@ async function extendDueDate(loanId) {
       return;
     }
 
-    const restore = setButtonLoading(saveBtn, "Extending…");
+    const restore = setButtonLoading(saveBtn, "Saving…");
+    const oldDueOn = loan.dueOn;
     try {
       await updateDoc(doc(_db, "loans", loanId), {
         dueOn: newDate,
         updatedAt: serverTimestamp(),
       });
-      showToast("Due date extended.", "success");
       closeModal(overlay);
+      showToast(`Done! New due date is ${friendlyDate(newDate)}.`, "success", 6000, {
+        actionText: "Undo",
+        onAction: async () => {
+          try {
+            await updateDoc(doc(_db, "loans", loanId), { dueOn: oldDueOn, updatedAt: serverTimestamp() });
+            showToast(`Undone — due date is back to ${friendlyDate(oldDueOn)}.`, "info");
+          } catch (undoErr) {
+            console.error("Undo error:", undoErr);
+            showToast("Couldn't undo that — " + undoErr.message, "error");
+          }
+        },
+      });
     } catch (err) {
-      showFieldError(dateInput, errorEl, "Failed to extend: " + err.message);
+      showFieldError(dateInput, errorEl, "Couldn't save that — " + err.message);
     } finally {
       restore();
     }
@@ -1387,7 +1429,7 @@ async function openEditLoanModal(loanId) {
     <div class="modal modal--large">
       <div class="modal__header">
         <h2 class="modal__title">Edit Loan</h2>
-        <button class="modal__close" aria-label="Close">${icon("x", { size: 16 })}</button>
+        <button class="modal__close" title="Close" aria-label="Close">${icon("x", { size: 16 })}</button>
       </div>
       <div class="modal__body">
         <div class="info-banner" style="display:flex; align-items:center; gap:0.4rem; padding:0.65rem 0.875rem; background:var(--clr-surface-alt); border:1px solid var(--clr-border); border-radius:var(--radius); margin-bottom:1.25rem; font-size:0.875rem;">
@@ -1468,10 +1510,10 @@ async function openEditLoanModal(loanId) {
         await updateDoc(borrowerRef, { fullName: name }).catch(() => {});
       }
 
-      showToast("Loan updated successfully.", "success");
+      showToast("Done! Changes saved.", "success");
       closeModal(overlay);
     } catch (err) {
-      showToast("Failed to save: " + err.message, "error");
+      showToast("Couldn't save that — " + err.message, "error");
     } finally {
       restore();
     }
@@ -1483,8 +1525,8 @@ async function deleteLoan(loanId) {
   if (!loan) return;
 
   const ok = await confirmDialog(
-    `Delete this loan record for "${loan.bookTitle}" borrowed by ${loan.borrowerName}? This will return 1 copy to the shelf. This action cannot be undone.`,
-    { title: "Delete Loan Record", confirmText: "Delete Record", danger: true }
+    `Delete this record? "${loan.bookTitle}" borrowed by ${loan.borrowerName} will come off the list, and 1 copy will go back on the shelf. This cannot be undone.`,
+    { title: "Delete this record?", confirmText: "Yes, delete", danger: true }
   );
   if (!ok) return;
 
@@ -1508,10 +1550,10 @@ async function deleteLoan(loanId) {
         }
       }
     });
-    showToast("Loan deleted.", "success");
+    showToast("Deleted. That loan record is gone.", "success");
   } catch (err) {
     console.error(err);
-    showToast("Failed to delete loan: " + err.message, "error");
+    showToast("Couldn't delete that — " + err.message, "error");
   }
 }
 
@@ -1525,19 +1567,19 @@ export function exportCSV() {
   const visible = applyFilterAndSearch(sorted, today);
 
   if (visible.length === 0) {
-    showToast("Nothing to export — no records match the current filter/search.", "info");
+    showToast("Nothing to download — no records match what you're looking at right now.", "info");
     return;
   }
 
   const csv = buildCSV(visible, today);
   if (!csv) {
-    showToast("Nothing to export.", "info");
+    showToast("Nothing to download yet.", "info");
     return;
   }
 
   const filename = `library-records-${today}.csv`;
   downloadCSV(csv, filename);
-  showToast(`Exported ${visible.length} record(s).`, "success");
+  showToast(`Done! Downloaded ${visible.length} record(s).`, "success");
 }
 
 /* ════════════════════════════════════════════════════════════

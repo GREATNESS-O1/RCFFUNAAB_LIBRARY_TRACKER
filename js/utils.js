@@ -152,7 +152,7 @@ export function computeLoanStatus(loan, today) {
     const n = Math.abs(diff);
     return {
       status: "overdue",
-      daysText: n === 1 ? "1 day overdue" : `${n} days overdue`,
+      daysText: n === 1 ? "1 day late" : `${n} days late`,
     };
   }
 

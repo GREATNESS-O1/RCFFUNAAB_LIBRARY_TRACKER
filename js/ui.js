@@ -158,6 +158,67 @@ export function confirmDialog(message, { title = "Please confirm", confirmText =
 }
 
 /* ═══════════════════════════════════════════════════════════
+   HELP SHEET (plain-language how-tos)
+   ═══════════════════════════════════════════════════════════ */
+
+const HELP_TOPICS = [
+  {
+    icon: "plus",
+    title: "Lend a book",
+    text: 'Tap the blue "Lend a book" button, search for the book, then type the borrower\'s name and phone number. Pick a due date and save — that\'s it.',
+  },
+  {
+    icon: "check",
+    title: "Receive a returned book",
+    text: 'Find the loan in the list and tap "Book returned." The book goes back on the shelf right away. Changed your mind? Tap "Undo" on the confirmation message.',
+  },
+  {
+    icon: "whatsapp",
+    title: "Remind on WhatsApp",
+    text: 'Open the "⋯" menu on a loan and choose "Remind on WhatsApp" to send that borrower a friendly reminder about their due date.',
+  },
+  {
+    icon: "download",
+    title: "Download the list",
+    text: '"Download list (Excel)" saves everything you\'re currently looking at as a spreadsheet file, so you can open it in Excel or share it by email.',
+  },
+];
+
+/** Opens the Help sheet listing plain-language how-tos for common tasks. */
+export function openHelpSheet() {
+  const overlay = document.createElement("div");
+  overlay.className = "modal-overlay";
+  overlay.setAttribute("role", "dialog");
+  overlay.setAttribute("aria-modal", "true");
+  overlay.setAttribute("aria-label", "Help");
+
+  const itemsHtml = HELP_TOPICS.map(
+    (t) => `
+      <div class="help-modal__item">
+        <span class="help-modal__icon">${icon(t.icon, { size: 18 })}</span>
+        <div>
+          <div class="help-modal__title">${escHtml(t.title)}</div>
+          <div class="help-modal__text">${escHtml(t.text)}</div>
+        </div>
+      </div>`
+  ).join("");
+
+  overlay.innerHTML = `
+    <div class="modal modal--small">
+      <div class="modal__header">
+        <h2 class="modal__title">How to use this app</h2>
+        <button class="modal__close" id="help-close" title="Close" aria-label="Close">${icon("x", { size: 16 })}</button>
+      </div>
+      <div class="modal__body">
+        ${itemsHtml}
+      </div>
+    </div>`;
+
+  openModal(overlay, null);
+  overlay.querySelector("#help-close")?.addEventListener("click", () => closeModal(overlay, null));
+}
+
+/* ═══════════════════════════════════════════════════════════
    MODAL HELPERS
    ═══════════════════════════════════════════════════════════ */
 
@@ -264,7 +325,7 @@ export function setButtonLoading(btn, loadingText = "Saving…") {
  * @param {"active"|"overdue"|"returned"} status
  */
 export function statusBadge(status) {
-  const labels = { active: "Active", overdue: "Overdue", returned: "Returned" };
+  const labels = { active: "Out now", overdue: "Late", returned: "Returned" };
   const iconNames = { active: "clock", overdue: "alert", returned: "check" };
   const label = labels[status] || status;
   const ic = icon(iconNames[status] || "clock", { size: 12 });
@@ -306,12 +367,8 @@ export function emptyStateLoans() {
       <div class="empty-state__icon" style="color:var(--clr-primary);">
         ${icon("book", { size: 48 })}
       </div>
-      <h3 class="empty-state__title">No loans recorded yet</h3>
-      <p class="empty-state__msg">Start tracking physical books by recording your first loan.</p>
-      <button class="btn btn--primary" id="empty-new-loan-btn" style="display:inline-flex; align-items:center; gap:0.4rem;">
-        ${icon("plus", { size: 16 })}
-        <span>Record New Loan</span>
-      </button>
+      <h3 class="empty-state__title">Nothing lent out yet</h3>
+      <p class="empty-state__msg">When someone borrows a book, record it here. Use the "Lend a book" button above to get started.</p>
     </div>`;
 }
 
