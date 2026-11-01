@@ -1173,6 +1173,8 @@ async function createLoanTransaction({ bookId, borrowerId, borrowerPhone, borrow
   const loanRef = doc(loansCol);
 
   await runTransaction(_db, async (tx) => {
+    // Firestore transactions require every read to happen before any
+    // write, so both reads (book, borrower) run first, then all writes.
     const bookSnap = await tx.get(bookRef);
     if (!bookSnap.exists()) throw new Error("Book not found.");
 
@@ -1181,11 +1183,12 @@ async function createLoanTransaction({ bookId, borrowerId, borrowerPhone, borrow
       throw new Error("No copies available for this book right now.");
     }
 
+    const borrowerSnap = await tx.get(borrowerRef);
+
     // Decrement copies
     tx.update(bookRef, { copiesAvailable: bookData.copiesAvailable - 1 });
 
     // Upsert borrower
-    const borrowerSnap = await tx.get(borrowerRef);
     if (!borrowerSnap.exists()) {
       tx.set(borrowerRef, {
         fullName: borrowerName,
@@ -1219,13 +1222,14 @@ async function createLoanTransaction({ bookId, borrowerId, borrowerPhone, borrow
 export async function undoCreateLoan(loanId, bookId) {
   await runTransaction(_db, async (tx) => {
     const loanRef = doc(_db, "loans", loanId);
+    const bookRef = doc(_db, "books", bookId);
+
+    // Both reads before any write — Firestore transaction rule.
     const loanSnap = await tx.get(loanRef);
     if (!loanSnap.exists()) return;
+    const bookSnap = await tx.get(bookRef);
 
     tx.delete(loanRef);
-
-    const bookRef = doc(_db, "books", bookId);
-    const bookSnap = await tx.get(bookRef);
     if (bookSnap.exists()) {
       const book = bookSnap.data();
       const newAvail = Math.min((book.copiesAvailable || 0) + 1, book.copiesTotal || 1);
@@ -1537,17 +1541,18 @@ async function deleteLoan(loanId) {
   try {
     await runTransaction(_db, async (tx) => {
       const loanRef = doc(_db, "loans", loanId);
+      const bookRef = doc(_db, "books", loan.bookId);
+
+      // Read before any write — Firestore transaction rule.
+      const bookSnap = isActive ? await tx.get(bookRef) : null;
+
       tx.delete(loanRef);
 
       // If loan was active, restore the copy to the shelf
-      if (isActive) {
-        const bookRef = doc(_db, "books", loan.bookId);
-        const bookSnap = await tx.get(bookRef);
-        if (bookSnap.exists()) {
-          const book = bookSnap.data();
-          const newAvail = Math.min((book.copiesAvailable || 0) + 1, book.copiesTotal || 1);
-          tx.update(bookRef, { copiesAvailable: newAvail });
-        }
+      if (isActive && bookSnap.exists()) {
+        const book = bookSnap.data();
+        const newAvail = Math.min((book.copiesAvailable || 0) + 1, book.copiesTotal || 1);
+        tx.update(bookRef, { copiesAvailable: newAvail });
       }
     });
     showToast("Deleted. That loan record is gone.", "success");

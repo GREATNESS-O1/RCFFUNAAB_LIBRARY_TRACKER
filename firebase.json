@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "site": "rcffunaab-library-tracker",
     "public": ".",
     "ignore": [
       "firebase.json",
@@ -7,10 +8,14 @@
       ".gitignore",
       "firestore.rules",
       "README.md",
+      "REDESIGN_SUMMARY.md",
       "package.json",
       "package-lock.json",
       "sample_books_import.csv",
       ".git/**",
+      ".claude/**",
+      ".firebase/**",
+      "node_modules/**",
       "**/.*"
     ],
     "rewrites": [],
