@@ -385,12 +385,18 @@ input, textarea, select { font-family: inherit; font-size: 0.9375rem; }
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  flex-shrink: 0;
+  /* Lets the title truncate instead of forcing the header (and the
+     help/theme/avatar buttons on the right) off the edge of a phone
+     screen — flex items refuse to shrink below their content by
+     default, so both flex-shrink and min-width have to be opened up. */
+  flex-shrink: 1;
+  min-width: 0;
 }
 
 .header-logo img {
   width: 36px;
   height: 36px;
+  flex-shrink: 0;
   object-fit: contain;
   /* The logo's own edges are soft/blended — a small white rounded
      backdrop gives it clean definition against the header. */
@@ -403,6 +409,7 @@ input, textarea, select { font-family: inherit; font-size: 0.9375rem; }
 .header-title-group {
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .header-title {
@@ -410,6 +417,8 @@ input, textarea, select { font-family: inherit; font-size: 0.9375rem; }
   font-weight: 700;
   color: var(--clr-text);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   line-height: 1.2;
 }
 
@@ -417,6 +426,9 @@ input, textarea, select { font-family: inherit; font-size: 0.9375rem; }
   font-size: 0.8125rem;
   color: var(--clr-text-sub);
   font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .header-spacer { flex: 1; }
